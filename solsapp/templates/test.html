@@ -1,0 +1,279 @@
+{% extends 'common/base.html' %}
+{% load static %}
+{%block content%}
+
+    <style>
+        table.dataTable th {
+            border-bottom: 1px solid #333;
+            border-right: 1px solid #333;
+        }
+
+        table.dataTable td {
+            padding: 1%;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+            }
+
+        .filterIcon {
+            height: 16px;
+            width: 16px;
+        }
+
+        .modalFilter {
+            display: none;
+            height: auto;
+            background: #FFF;
+            border: solid 1px #ccc;
+            padding: 8px;
+            position: absolute;
+            z-index: 1001;
+        }
+
+            .modalFilter .modal-content {
+                max-height: 250px;
+                overflow-y: auto;
+            }
+
+            .modalFilter .modal-footer {
+                background: #FFF;
+                height: 35px;
+                padding-top: 6px;
+            }
+
+            .modalFilter .btn {
+                padding: 0 1em;
+                height: 28px;
+                line-height: 28px;
+                text-transform: none;
+            }
+
+        checkbox {
+
+            position:absolute ;
+        }
+
+        #mask {
+            display: none;
+            background: transparent;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            opacity: 1000;
+        }
+    </style>
+    <script>
+         function savedata($this, $table)
+            {
+                console.log(this.parentNode);
+                console.log($($this).val());
+            
+            }
+        $(document).ready(function () {
+
+            var dataSet = [
+    ["Tiger Nixon", "System Architect", "Edinburgh", "5421", "2011/04/25", "$320,800"],
+    ["Garrett Winters", "Accountant", "Tokyo", "8422", "2011/07/25", "$170,750"],
+    ["Ashton Cox", "Junior Technical Author", "San Francisco", "1562", "2009/01/12", "$86,000"],
+    ["Cedric Kelly", "Senior Javascript Developer", "Edinburgh", "6224", "2012/03/29", "$433,060"],
+    ["Airi Satou", "Accountant", "Tokyo", "5407", "2008/11/28", "$162,700"],
+    ["Brielle Williamson", "Integration Specialist", "New York", "4804", "2012/12/02", "$372,000"],
+    ["Herrod Chandler", "Sales Assistant", "San Francisco", "9608", "2012/08/06", "$137,500"],
+    ["Rhona Davidson", "Integration Specialist", "Tokyo", "6200", "2010/10/14", "$327,900"],
+    ["Colleen Hurst", "Javascript Developer", "San Francisco", "2360", "2009/09/15", "$205,500"],
+    ["Sonya Frost", "Software Engineer", "Edinburgh", "1667", "2008/12/13", "$103,600"],
+    ["Jena Gaines", "Office Manager", "London", "3814", "2008/12/19", "$90,560"],
+    ["Quinn Flynn", "Support Lead", "Edinburgh", "9497", "2013/03/03", "$342,000"],
+    ["Charde Marshall", "Regional Director", "San Francisco", "6741", "2008/10/16", "$470,600"],
+    ["Haley Kennedy", "Senior Marketing Designer", "London", "3597", "2012/12/18", "$313,500"],
+    ["Tatyana Fitzpatrick", "Regional Director", "London", "1965", "2010/03/17", "$385,750"],
+    ["Michael Silva", "Marketing sdbvksdnv ajhfbkasbdf akhfbkasbf kasbfabsf iabfkasbf  Designer", "London", "1581", "2012/11/27", "$198,500"],
+    ["Paul Byrd", "Chief Financial Officer (CFO)", "New York", "3059", "2010/06/09", "$725,000"],
+    ["Gloria Little", "Systems Administrator", "New York", "1721", "2009/04/10", "$237,500"],
+    ["Bradley Greer", "Software Engineer", "London", "2558", "2012/10/13", "$132,000"],
+    ["Dai Rios", "Personnel Lead", "Edinburgh", "2290", "2012/09/26", "$217,500"],
+    ["Jenette Caldwell", "Development Lead", "New York", "1937", "2011/09/03", "$345,000"],
+    ["Yuri Berry", "Chief Marketing Officer (CMO)", "New York", "6154", "2009/06/25", "$675,000"],
+    ["Caesar Vance", "Pre-Sales Support", "New York", "8330", "2011/12/12", "$106,450"],
+    ["Doris Wilder", "Sales Assistant", "Sidney", "3023", "2010/09/20", "$85,600"],
+    ["Angelica Ramos", "Chief Executive Officer (CEO)", "London", "5797", "2009/10/09", "$1,200,000"],
+    ["Gavin Joyce", "Developer", "Edinburgh", "8822", "2010/12/22", "$92,575"],
+    ["Jennifer Chang", "Regional Director", "Singapore", "9239", "2010/11/14", "$357,650"],
+    ["Brenden Wagner", "Software Engineer", "San Francisco", "1314", "2011/06/07", "$206,850"],
+    ["Fiona Green", "Chief Operating Officer (COO)", "San Francisco", "2947", "2010/03/11", "$850,000"],
+    ["Shou Itou", "Regional Marketing", "Tokyo", "8899", "2011/08/14", "$163,000"],
+    ["Michelle House", "Integration Specialist", "Sidney", "2769", "2011/06/02", "$95,400"],
+    ["Suki Burks", "Developer", "London", "6832", "2009/10/22", "$114,500"],
+    ["Prescott Bartlett", "Technical Author", "London", "3606", "2011/05/07", "$145,000"],
+    ["Gavin Cortez", "Team Leader", "San Francisco", "2860", "2008/10/26", "$235,500"],
+    ["Martena Mccray", "Post-Sales support", "Edinburgh", "8240", "2011/03/09", "$324,050"],
+    ["Unity Butler", "Marketing Designer", "San Francisco", "5384", "2009/12/09", "$85,675"]
+            ];
+
+
+
+            table = $('#maintable').DataTable({
+                data: dataSet,
+                "lengthMenu": [5, 10, 50, "All"],
+                "pageLength": 10,
+                columns: [
+            { title: "Name" },
+            { title: "Position" },
+            { title: "Office" },
+            { title: "Extn." },
+            { title: "Start date" },
+            { title: "Salary" }
+                ],
+                initComplete: function () {
+                    configFilter(this, [0, 1, 2, 4]);
+                }
+            });
+
+            $('#maintable_length,#maintable_filter').hide();
+            $('#maintable tbody td').on ('click', function (e) {
+                if(this === e.target) {
+                    var data = table.row( this ).data();
+                    console.log(e.target);
+                    //alert( 'Clicked on cell in visible column: '+table.cell( this ).index().columnVisible );
+                    //$("#maintable tbody td").css("pointer-events", "none");
+                    this.innerHTML = "<input type='text' autofocus onblur='savedata(this)'/>";
+                    //inobj  = this.innerHTML;
+                    //inobj.onblur(function(){ console.log('log'); });
+                    //$("#maintable tbody td").css("pointer-events", "auto");
+                    
+                }
+
+            
+               
+        });
+
+
+                } );
+
+
+        //This function initializes the content inside the filter modal
+        function configFilter($this, colArray) {
+            setTimeout(function () {
+                var tableName = $this[0].id;
+                var columns = $this.api().columns();
+                $.each(colArray, function (i, arg) {
+                    $('#' + tableName + ' th:eq(' + arg + ')').append('<img src="" class="filterIcon" onclick="showFilter(event,\'' + tableName + '_' + arg + '\')" />');
+                });
+
+                var template = '<div class="modalFilter">' +
+                                 '<div class="modal-content">' +
+                                 '{0}</div>' +
+                                 '<div class="modal-footer">' +
+                                     '<a href="#!" onclick="clearFilter(this, {1}, \'{2}\');"  class=" btn left waves-effect waves-light">Clear</a>' +
+                                     '<a href="#!" onclick="performFilter(this, {1}, \'{2}\');"  class=" btn right waves-effect waves-light">Ok</a>' +
+                                 '</div>' +
+                             '</div>';
+                $.each(colArray, function (index, value) {
+                    columns.every(function (i) {
+                        if (value === i) {
+                            var column = this, content = '<input type="text" class="filterSearchText" onkeyup="filterValues(this)" /> <br/>';
+                            var columnName = $(this.header()).text().replace(/\s+/g, "_");
+                            var distinctArray = [];
+                            console.log(column.data());
+                            column.data().each(function (d, j) {
+                                if (distinctArray.indexOf(d) == -1) {
+                                    var id = tableName + "_" + columnName + "_" + j; // onchange="formatValues(this,' + value + ');
+                                    content += '<div><input type="checkbox"  value="' + d + '"  id="' + id + '"/><label for="' + id + '"> ' + d + '</label></div>';
+                                    distinctArray.push(d);
+                                }
+                            });
+                            var newTemplate = $(template.replace('{0}', content).replace('{1}', value).replace('{1}', value).replace('{2}', tableName).replace('{2}', tableName));
+                            $('body').append(newTemplate);
+                            modalFilterArray[tableName + "_" + value] = newTemplate;
+                            content = '';
+                        }
+                    });
+                });
+            }, 50);
+        }
+        var modalFilterArray = {};
+        //User to show the filter modal
+        function showFilter(e, index) {
+            $('.modalFilter').hide();
+            $(modalFilterArray[index]).css({ left: 0, top: 0 });
+            var th = $(e.target).parent();
+            var pos = th.offset();
+            console.log(th);
+            $(modalFilterArray[index]).width(th.width() * 0.75);
+            $(modalFilterArray[index]).css({ 'left': pos.left, 'top': pos.top });
+            $(modalFilterArray[index]).show();
+            $('#mask').show();
+            e.stopPropagation();
+        }
+
+        //This function is to use the searchbox to filter the checkbox
+        function filterValues(node) {
+            var searchString = $(node).val().toUpperCase().trim();
+            var rootNode = $(node).parent();
+            if (searchString == '') {
+                rootNode.find('div').show();
+            } else {
+                rootNode.find("div").hide();
+                rootNode.find("div:contains('" + searchString + "')").show();
+            }
+        }
+
+        //Execute the filter on the table for a given column
+        function performFilter(node, i, tableId) {
+            var rootNode = $(node).parent().parent();
+            var searchString = '', counter = 0;
+
+            rootNode.find('input:checkbox').each(function (index, checkbox) {
+                if (checkbox.checked) {
+                    searchString += (counter == 0) ? checkbox.value : '|' + checkbox.value;
+                    counter++;
+                }
+            });
+            $('#' + tableId).DataTable().column(i).search(
+                searchString,
+                true, false
+            ).draw();
+            rootNode.hide();
+            $('#mask').hide();
+        }
+
+        //Removes the filter from the table for a given column
+        function clearFilter(node, i, tableId) {
+            var rootNode = $(node).parent().parent();
+            rootNode.find(".filterSearchText").val('');
+            rootNode.find('input:checkbox').each(function (index, checkbox) {
+                checkbox.checked = false;
+                $(checkbox).parent().show();
+            });
+            $('#' + tableId).DataTable().column(i).search(
+                '',
+                true, false
+            ).draw();
+            rootNode.hide();
+            $('#mask').hide();
+        }
+
+
+        </script>
+
+    <div id="mask"></div>
+    <table id="maintable" class=" material-table centered striped yellow"></table>
+
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <h4>Modal Header</h4>
+    <div id="modal_content" class="row">
+
+    </div>
+    <div class="modal-footer" style="position: absolute;">
+      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Ok</a>
+    </div>
+  </div>
+
+
+{%endblock%}
