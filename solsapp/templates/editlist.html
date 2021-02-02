@@ -1,0 +1,236 @@
+{% extends 'common/Base.html' %}
+{% block styles %}
+<style>
+.select2-container .select2-selection {
+    height: 100px;
+    overflow: scroll;
+} 
+
+</style>
+{% endblock %}
+{% block content %}
+    <div class="container" style="margin-top:10px;">
+        <div class="border"  style="padding: 10px;margin-top:20px;">
+            <button class="btn btn-danger float-right" type="submit" id="listdelete_button">Delete list</button>
+            <h3>EDIT List: {{Listname}}</h3>
+            <div>
+                <form class="needs-validation" novalidate action="/CreateList" method="POST" id='NewListForm'>
+                    <div class="form-group">
+                        {% csrf_token %}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="listname" style="padding: 5px;"> List name </label>
+                        <input type="text" class="form-control" id='listname' name='Listname' placeholder="List name" value="{{Listname}}" required/>
+                        <div class="invalid-feedback">Field cannot be empty.</div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="listdescription" style="padding: 5px;"> List Description </label>
+                        <textarea class="form-control" id='listdescription' name='Listdescription' placeholder="List Description" required>{{Listdescription}}</textarea>
+                        <div class="invalid-feedback">Field cannot be empty.</div>
+                    </div>
+                {% for col in columns %}
+                    <div class="row mb-3" id="list-column_{{col.Id}}">                     
+                        <input type="hidden" name="Id_{{col.Id}}" value="{{col.Id}}">
+                    <div class="col">
+                        <input type="text" class="form-control" placeholder="Column title" aria-label="Column title" name="col_title_{{col.Id}}" value="{{col.col_title}}" required>
+                        <div class="invalid-feedback">Field cannot be empty.</div>
+                    </div>
+                    <div class="col">
+                        <textarea class="form-control" placeholder="Description" aria-label="col_description" style= "height: 100%;" name="col_description_{{col.Id}}">{{col.col_description}}</textarea>
+                    </div>
+                    <div class="col">
+                        <label for="col_datatype_{{col.Id}}">Field type</label>
+                        <select class="form-control" aria-label="col_datatype" id="col_datatype_'+colidvar+'" name="col_datatype_{{col.Id}}"required>
+                            
+                            {% for val, opt in data_type.items %}
+                                {% if col.col_datatype == val %} 
+                                    <option value="{{val}}" selected>{{opt}}</option>
+                                {% else %}
+                                    <option value="{{val}}">{{opt}}</option>
+                                {% endif %}
+
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if col.col_datatype == 'select' %}
+                    <div class="col" name="col_datatype_{{col.Id}}_options_div">
+                        <label for="col_datatype_{{col.Id}}_options">Options</label>
+                        <select class="form-control" multiple="multiple" id = "col_datatype_{{col.Id}}_options" name="col_datatype_{{col.Id}}_options">
+                            {% for opt in col.col_datatype_options %}
+                                <option value="{{opt}}" selected>{{opt}}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Field cannot be empty.</div>
+                    </div>
+                    {% else %}
+                    <div class="col" style="display:none;" name="col_datatype_{{col.Id}}_options_div">
+                        <label for="col_datatype_{{col.Id}}_options">Options</label>
+                        <select class="form-control" multiple="multiple" id = "col_datatype_{{col.Id}}_options" name="col_datatype_{{col.Id}}_options">
+                        </select>
+                        <div class="invalid-feedback">Field cannot be empty.</div>
+                    </div>
+                    {% endif %}
+                    <div class="col">
+                        <label for="col_datatype_{{col.Id}}">Filter type</label>
+                        <select class="form-control" aria-label="col_filtertype" id ="col_filtertype_{{col.Id}}" name="col_filtertype_{{col.Id}}" required>
+                            {% for val, opt in filter_type.items %}
+                                {% if col.col_filtertype == val %}
+                                    <option value="{{val}}" selected>{{opt}}</option>
+                                {% else %}
+                                    <option value="{{val}}">{{opt}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-primary" style="margin-right:10px" type="button" id="listupload_button" onclick=AddColumn(this)>+</button>
+                        <button class="btn btn-primary" type="button" id="listupload_button_'+colidvar+'" onclick=RemoveColumn(this)>X</button>
+                    </div>
+                </div>
+                {% endfor %}
+
+                      <div class="form-footer mb-3">
+                        <button class="btn btn-primary" type="submit" id="listupload_button">Update</button>
+                      </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var colidvar = {{columns|length}};
+
+        $(document).ready(function() { 
+            $('[name^=col_datatype_][name$=_options]').select2({
+                            tags: "true",
+                            placeholder: "Add options",
+                            tokenSeparators: [','],
+                            allowClear: true
+                });
+            
+            $('select[name^="col_datatype_"]').change(function(){
+                                    
+                                    if($(this).find('option:selected').attr('value') == "select"){
+                                                
+                                                $("[name='"+$(this).attr('name')+"_options_div']").show();
+                                                $("[name='"+$(this).attr('name')+"_options']").attr("required", true);
+                                        }
+                                    else{
+                                                
+                                                $("[name='"+$(this).attr('name')+"_options']").attr("required", false);
+                                                $("[name='"+$(this).attr('name')+"_options']").val([]).change();
+                                                $("[name='"+$(this).attr('name')+"_options_div']").hide();
+                                        }
+                });
+            
+                bootstrapValidate('[name^="col_title_"]', 'regex:^[A-Za-z0-9][A-Za-z0-9 ]\*[A-Za-z0-9]\*$:Special charachters not allowed!');
+            
+        });
+
+        function initatize(){
+
+            $('select[name^="col_datatype_'+colidvar+'"]').change(function(){
+                                    
+                                    if($(this).find('option:selected').attr('value') == "select"){
+                                                
+                                                $("[name='"+$(this).attr('name')+"_options_div']").show();
+                                                $("[name='"+$(this).attr('name')+"_options']").attr("required", true);
+                                        }
+                                    else{
+                                                
+                                                $("[name='"+$(this).attr('name')+"_options']").attr("required", false);
+                                                $("[name='"+$(this).attr('name')+"_options_div']").hide();
+                                        }
+                });
+                
+                $('[name="col_datatype_'+colidvar+'_options"]').select2({
+                            tags: "true",
+                            placeholder: "Add options",
+                            tokenSeparators: [','],
+                            allowClear: true
+                });
+            
+                bootstrapValidate('[name="col_title_'+colidvar+'"]', 'regex:^[A-Za-z0-9][A-Za-z0-9 ]\*[A-Za-z0-9]\*$:Special charachters not allowed!');
+                
+        }
+    
+        function AddColumn($this){
+            var html = '<div class="row mb-3" id="list-column_'+colidvar+'">'+
+                            
+                                '<input type="hidden" name="Id_'+colidvar+'" value="'+colidvar+'">'+
+                            
+                            '<div class="col">'+
+                                '<input type="text" class="form-control" placeholder="Column title" aria-label="Column title" name="col_title_'+colidvar+'"required>'+
+                                '<div class="invalid-feedback">Field cannot be empty.</div>'+
+                            '</div>'+
+                            '<div class="col">'+
+                                '<textarea class="form-control" placeholder="Description" aria-label="col_description" style= "height: 100%;" name="col_description_'+colidvar+'"></textarea>'+
+                            '</div>'+
+                            '<div class="col">'+
+                                '<label for="col_datatype_'+colidvar+'">Field type</label>'+
+                                '<select class="form-control" aria-label="col_datatype" id="col_datatype_'+colidvar+'" name="col_datatype_'+colidvar+'"required>'+
+                                    '<option value="text">Short text</option>'+
+                                    '<option value="textarea">Long text</option>'+
+                                    '<option value="number">Number</option>'+
+                                    '<option value="date">Date</option>'+
+                                    '<option value="select">List</option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<div class="col" style="display:none;" name="col_datatype_'+colidvar+'_options_div">'+
+                                '<label for="col_datatype_'+colidvar+'_options">Options</label>'+
+                                '<select class="form-control" multiple="multiple" id = "col_datatype_'+colidvar+'_options" name="col_datatype_'+colidvar+'_options">'+
+                                    
+                                '</select>'+
+                                '<div class="invalid-feedback">Field cannot be empty.</div>'+
+                            '</div>'+
+                            '<div class="col">'+
+                                '<label for="col_datatype_'+colidvar+'">Filter type</label>'+
+                                '<select class="form-control" aria-label="col_filtertype" id ="col_filtertype_'+colidvar+'" name="col_filtertype_'+colidvar+'" required>'+
+                                    '<option value="select">Single selection</option>'+
+                                    '<option value="multi_select">Multi selection</option>'+
+                                    '<option value="auto_complete">Text</option>'+
+                                    '<option value="date">Date</option>'+
+                                    '<option value="range_number">Number range</option>'+
+                                    '<option value="range_date">Date range</option>'+
+                                '</select>'+
+                            '</div>'+
+                            '<div class="col">'+
+                                '<button class="btn btn-primary" style="margin-right:10px" type="button" id="listupload_button" onclick=AddColumn(this)>+</button>'+
+                                '<button class="btn btn-primary" type="button" id="listupload_button_'+colidvar+'" onclick=RemoveColumn(this)>X</button>'+
+                            '</div>'+
+                        '</div>'
+            $('#NewListForm div:last').before(html);
+            //$($this).parent().parent().after(html);
+            
+           initatize(this);
+                colidvar++;
+    
+        };
+    
+        function RemoveColumn($this){
+            console.log( $($this)); 
+            $($this).parent('div').parent('div').remove();
+        };
+    
+    
+    </script>
+    
+    <script>
+        (function() {
+          'use strict';
+          window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+              form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    console.log(form.checkValidity());
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+              }, false);
+            });
+          }, false);
+        })();
+    </script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'common/Base.html' %}
+{% block content %}
+
+<div class="container">
+
+    <div class="border bg-light" style="margin-top:20px;">
+    <form action="/CreateList" method="post" enctype="multipart/form-data" style="padding: 10px;">
+        <div class="form-group">
+            {% csrf_token %}
+            </div>  
+            <div class="form-group">
+          
+                <label for="listupload-div" style="padding: 5px;">Create list from an excel file</label>
+             
+            <div class="input-group" id="listupload-div">
+                <input type="file" class="form-control" id="listupload" aria-describedby="listupload_button"  name='files'>
+                <button class="btn btn-primary" type="submit" id="listupload_button">Upload</button>
+            </div>
+            </div> 
+    </form>
+    </div>
+
+<div class="border"  style="padding: 10px;margin-top:20px;">
+    <h3>Define your List</h3>
+    <div>
+        <form action="/CreateList" method="POST" id='NewListForm'>
+            <div class="form-group">
+                {% csrf_token %}
+            </div>
+            <div class="form-group mb-3">
+                <label for="listname" style="padding: 5px;"> List name </label>
+                <input type="text" class="form-control" id='listname' name='Listname' placeholder="List name"/>
+            </div>
+            <div class="form-group mb-3">
+                <label for="listdescription" style="padding: 5px;"> List Description </label>
+                <textarea class="form-control" id='listdescription' name='Listdescription' placeholder="List Description"></textarea>
+            </div>
+            <!--
+            <div class="row" id="list-columns">
+                <div class="col">
+                  <input type="text" class="form-control" placeholder="Column title" aria-label="Column title" name="col-title">
+                </div>
+                <div class="col">
+                  <textarea class="form-control" placeholder="Description" aria-label="col-description" name="col-description"></textarea>
+                </div>
+                <div class="col">
+                    <select class="form-select" aria-label="col-datatype" name="col-datatype">
+                        <option selected>Select data type</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>
+                  </div>
+                  <div class="col">
+                    <select class="form-select" aria-label="col-filtertype" name="col-filtertype">
+                        <option selected>Select filter type</option>
+                        <option value="1">One</option>
+                        <option value="2">Two</option>
+                        <option value="3">Three</option>
+                      </select>                  
+                    </div>
+                  <div class="col">
+                    <button class="btn btn-primary" type="button" id="listupload_button" onclick=AddColumn()>+</button>
+                    <button class="btn btn-primary" type="button" id="listupload_button" onclick=RemoveColumn()>X</button>
+                  </div>
+              </div>
+                -->
+              <div class="form-footer mb-3">
+                <button class="btn btn-primary" type="submit" id="listupload_button">Create</button>
+              </div>
+        </form>
+    </div>
+</div>
+
+</div>
+
+<script type="text/javascript">
+    var colidvar = 0;
+    $(document).ready(function() { 
+            AddColumn();
+    });
+
+    function AddColumn(){
+        var html = '<div class="row mb-3" id="list-column_'+colidvar+'">'+
+                        
+                            '<input type="hidden" name="Id_'+colidvar+'" value="'+colidvar+'">'+
+                        
+                        '<div class="col">'+
+                            '<input type="text" class="form-control" placeholder="Column title" aria-label="Column title" name="col-title_'+colidvar+'">'+
+                        '</div>'+
+                        '<div class="col">'+
+                            '<textarea class="form-control" placeholder="Description" aria-label="col-description" name="col-description_'+colidvar+'"></textarea>'+
+                        '</div>'+
+                        '<div class="col">'+
+                            '<select class="form-select" aria-label="col-datatype" name="col-datatype_'+colidvar+'">'+
+                                '<option selected>Select data type</option>'+
+                                '<option value="1">One</option>'+
+                                '<option value="2">Two</option>'+
+                                '<option value="3">Three</option>'+
+                            '</select>'+
+                        '</div>'+
+                        '<div class="col">'+
+                            '<select class="form-select" aria-label="col-filtertype" name="col-filtertype_'+colidvar+'">'+
+                                '<option selected>Select filter type</option>'+
+                                '<option value="1">One</option>'+
+                                '<option value="2">Two</option>'+
+                                '<option value="3">Three</option>'+
+                            '</select>'+
+                        '</div>'+
+                        '<div class="col">'+
+                            '<button class="btn btn-primary" style="margin-right:10px" type="button" id="listupload_button" onclick=AddColumn()>+</button>'+
+                            '<button class="btn btn-primary" type="button" id="listupload_button_'+colidvar+'" onclick=RemoveColumn(this)>X</button>'+
+                        '</div>'+
+                    '</div>'
+        $('#NewListForm').append(html);
+        console.log(colidvar);
+        colidvar++;
+    };
+
+    function RemoveColumn($this){
+        console.log( $($this));
+        $($this).parent('div').parent('div').remove();
+    }
+</script>
+ {% endblock %}

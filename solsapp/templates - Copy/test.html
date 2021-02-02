@@ -1,0 +1,217 @@
+{% extends 'common/Base.html' %}
+{% block content %}
+
+
+<div class="contianer"> 
+<div style="margin-right:0.5%;margin-left:0.5%;">
+<table id="Maintable" class="display" style="width: 100%; table-layout: fixed;" >
+    <thead>
+        <tr>
+            <th title="Name of .." data-bs-toggle="tooltip" data-bs-placement="right">Name</th>
+            <th title="Position os">Position</th>
+            <th title="Offive od">Office</th>
+            <th title="crxe">Extn.</th>
+            <th title="csdse">Start date</th>
+            <th title="cSalme">Salary</th>
+            <th title="custom Name">Salary</th>
+
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th title="Name of ..">Name</th>
+            <th Description="Position os">Position</th>
+            <th Description="Offive od">Office</th>
+            <th Description="crxe">Extn.</th>
+            <th Description="csdse">Start date</th>
+            <th Description="cSalme">Salary</th>
+            <th Description="custom Name">Salary</th>
+        </tr>
+    </tfoot>
+</table>
+</div>
+</div>
+<div class="modal fade" id="Deletionmodal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="DeletionmodalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="DeletionmodalLabel">Delete ?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id='Deletion-modal-body'>
+          You are about to delete records. Are you sure ?
+        </div>
+        <div class="modal-footer" id='Deletionmodalfooter'>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    $(document).ready(function() {
+
+       // $('#Maintable thead th').each( function() {
+         //   console.log($(this).attr('Description'));
+           // this.setAttribute( 'title', $(this).attr('Description') );
+        //});
+
+        //$('#Maintable tfoot th').each( function() {
+          //  console.log($(this).attr('Description'));
+           // this.setAttribute( 'title', $(this).attr('Description') );
+        //});
+
+        var table = $('#Maintable').DataTable( {
+            "scrollY": $(window).height()*60/100,
+            "scrollX": true,
+            "paging": false,
+            "scrollCollapse": true,
+            "ajax": "GetTableData",
+            "rowId": "id",
+            "dom": '<"toolbar">frti',
+            "columns": [
+                { "data": "name" },
+                { "data": "position" },
+                { "data": "office" },
+                { "data": "extn" },
+                { "data": "start_date" },
+                { "data": "salary" },
+                { "data": "salary" }
+    
+            ],
+
+
+            initComplete: function () {
+    
+            $('#Maintable tbody td').on('dblclick', function (e) {
+                
+                    
+                    if(this === e.target) {
+                        var data = table.cell( this ).data();
+                        var row = table.row(this).data();
+                        var columns = table.settings().init().columns;
+                        var colIndex = table.cell(this).index().column;
+                        console.log(table.row(this).id());
+                        console.log(row.id);
+                        var input_id = 'input_'.concat(row.id.toString(),colIndex.toString());
+                        //alert( 'Clicked on cell in visible column: '+table.cell( this ).index().columnVisible );
+                        //$("#maintable tbody td").css("pointer-events", "none");
+                        //this.innerHTML = "<input type='text' id="+input_id +" style='width:".concat($(this).css("width"),";'autofocus onblur='savedata(this,",row.id,',"',columns[colIndex].data,'"',")' value='",data,"'/>");
+                        this.innerHTML = "<textarea type='text' id="+input_id +" style='width:".concat($(this).css("width"),";'autofocus onblur='savedata(this,",row.id,',"',columns[colIndex].data,'"',")'>",data,"</textarea>");
+    
+                        //console.log($('#'+input_id));
+                        $('#'+input_id).focus();
+                        //inobj.onblur(function(){ console.log('log'); });
+                        //$("#maintable tbody td").css("pointer-events", "auto");
+                        
+                    } });
+            
+                    $('#Maintable tbody').on( 'click', 'tr', function () {
+                                $(this).toggleClass('selected');
+                        } );
+            }
+
+
+        } );
+        
+        //$(function () {
+        //$('[data-toggle="tooltip"]').tooltip();
+        //});
+        //table.$('th').tooltip( {
+        //"delay": 0,
+        //"track": true,
+        //"fade": 250
+        //   } );
+
+
+    
+        yadcf.init(table, [
+            {column_number : 0, filter_type: 'multi_select', select_type: 'select2'},
+            {column_number : 1, filter_type:'text'},
+            {column_number : 2,  select_type: 'select2'},
+            {column_number : 3},
+            {column_number : 4},
+            {column_number : 5}
+        ],
+        {
+                cumulative_filtering: true,
+        }
+        );
+    
+        //yadcf.exResetAllFilters(table,false);
+        
+        $("div.toolbar").html('<div role="alert" id="UpdateTip"></div>'+
+                            '<div class="bg-light" style="margin-top:10px"><button type="button" class="btn btn-outline-primary btn-sm" style="margin-left:10px;" onclick =ResetFilter()>Reset Filter</button>'+
+                            '<button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" style="margin-left:10px;" onclick=AddRow()>Add</button>'+
+                            '<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" style="margin-left:10px;" onclick=DeleteSelected()>Delete</button></div>'
+                            );
+        
+    
+    });
+    
+    </script>
+
+    <script type="text/javascript">
+
+        function savedata($this, $row, $col){
+            console.log($this);
+            console.log( $('#Maintable').DataTable().row('#'+$row).data());
+            var table = $('#Maintable').DataTable()
+            var temp = table.row('#'+$row).data()
+            if(temp[$col]!=$this.value)
+                {
+                    temp[$col] = $this.value;
+                    console.log(temp[$col]);
+                    var status = $('#UpdateTip')
+                    status[0].innerHTML = 'Updated';
+                    status.removeClass();
+                    status.addClass('alert alert-success');
+                }
+            table.row('#'+$row).data(temp).invalidate();
+            table.$('tr.selected').removeClass('selected');
+    
+    
+        };
+    
+        function ResetFilter(){
+            var table = $('#Maintable').DataTable();
+            yadcf.exResetAllFilters(table,false);
+            var status = $('#UpdateTip')
+            status[0].innerHTML = 'Failed';
+            status.removeClass();
+            status.addClass('alert alert-danger');
+            table.$('tr.selected').removeClass('selected');
+    
+        };
+    
+        function DeleteSelected(){
+            //var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'),{backdrop: false});
+            //myModal.show();
+            var table = $('#Maintable').DataTable();
+            var selected = table.rows('.selected').data();
+            if (selected.length > 0)
+                {
+                    $("#Deletionmodalfooter").on("click",".btn-primary", function(){
+                        selected.toArray().forEach(element => {
+                                console.log(table.row('#'+element.id).remove().draw(false))
+                    }); 
+                    table.$('tr.selected').removeClass('selected');
+                    $('#Deletionmodal').modal('hide');
+                        })
+                    
+                    $('#Deletion-modal-body')[0].innerHTML = "You are about to delete "+selected.length+" records. Are you sure ?";
+                    $('#Deletionmodal').modal('show');
+    
+            //console.log(table.row('.selected'));
+            //table.row('.selected').remove().draw( false );
+                };
+            
+        };
+
+        function AddRow(){
+
+        }
+    </script>
+    
+    
+  {% endblock %}
