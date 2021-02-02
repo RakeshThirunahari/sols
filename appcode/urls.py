@@ -19,6 +19,7 @@ from django.conf.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include('dummybackend.urls')),
     path('microsoft/', include('microsoft_auth.urls', namespace='microsoft')),
     path('', include('solsapp.urls')),
 ]
