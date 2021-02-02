@@ -31,4 +31,4 @@ jobs:
       with:
         app-name: 'solsapp'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_3f59848c632e4018943ee8936214c81c }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_48873db1fff24e43a04b85bf0da63b7b }}
